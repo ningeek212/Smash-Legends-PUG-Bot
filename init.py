@@ -15,5 +15,9 @@ async def on_ready():
     print("Ready")
     print(f"This bot is owned by {bot.owner}")
 
+@slash_command(name="reload")
+async def reload(ctx: SlashContext):
+    bot.reload_extension("commands.BaseCommands")
+
 bot.load_extension("commands.BaseCommands")
 bot.start(bot_token)
