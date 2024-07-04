@@ -28,7 +28,10 @@ async def on_ready():
 async def reload(ctx: SlashContext):
     bot.reload_extension("commands.BaseCommands")
     bot.reload_extension("commands.GameCommands")
+    bot.reload_extension("commands.TaskCommands")
+    await ctx.send("Reload")
 
 bot.load_extension("commands.BaseCommands")
 bot.load_extension("commands.GameCommands")
+bot.load_extension("commands.TaskCommands")
 bot.start(bot_token)

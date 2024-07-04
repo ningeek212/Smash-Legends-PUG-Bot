@@ -6,13 +6,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from utils.config import SCOPES, SL_PUG_ELO_SHEET_ID, DOMINION_TAB_NAME, DUEL_TAB_NAME, DUO_TAB_NAME
 
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-SL_PUG_ELO_SHEET_ID = "1-VjkV52wk492jUwW-DzH26ca2PLQwWsoBAxTT_IsvLY"
-
-DOMINION_TAB_NAME=r"'Dominion ELO & W/L'"
-DUO_TAB_NAME=r"'Duo TD ELO & W/L'"
-DUEL_TAB_NAME=r"'Duel ELO & W/L'"
 
 creds = None
 

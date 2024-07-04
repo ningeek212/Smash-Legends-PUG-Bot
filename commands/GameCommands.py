@@ -16,21 +16,22 @@ class GameCommands(Extension):
         required=True,
         description="Which gamemode you want to see the players' elo",
         choices=[
-            SlashCommandChoice("Dominion", Gamemode.Dominion.value),
-            SlashCommandChoice("Duo", Gamemode.Duo.value),
-            SlashCommandChoice("Duel", Gamemode.Duel.value)
+            SlashCommandChoice("Dominion", Gamemode.DOMINION.value),
+            SlashCommandChoice("Duo", Gamemode.DUO.value),
+            SlashCommandChoice("Duel", Gamemode.DUEL.value)
         ]
     )
     async def elo_function(self, ctx: SlashContext, gamemode: int):
         mode = Gamemode(gamemode)
         match mode:
-            case Gamemode.Dominion:
+            case Gamemode.DOMINION:
                 data = get_dominion_elo()
-            case Gamemode.Duo:
+            case Gamemode.DUO:
                 data = get_duo_elo()
-            case Gamemode.Duel:
+            case Gamemode.DUEL:
                 data = get_duel_elo()
         
         sorted_data = sorted(data, key=lambda elo: elo[1], reverse=True)
         data_str = [str(elo).ljust(5, ' ') + '\t' + player for (player, elo) in sorted_data]
         await create_pages(ctx, f"{mode.name} Elo", data_str, page_title="Elo: \t Player:")
+
