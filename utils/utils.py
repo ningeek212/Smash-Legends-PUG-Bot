@@ -24,8 +24,8 @@ async def general_embed(ctx: BaseContext, title: str, description: str,
 
 
 async def create_pages(
-        ctx: BaseContext, title: str, info: list[str], if_empty: str="Empty List",
-        sep: str="\n", elements_per_page: int=10):
+        ctx: BaseContext, title: str, info: list[str], page_title: str=None, if_empty: str="Empty List",
+        sep: str="\n", elements_per_page: int=10) -> int:
     # If there are no elements, then return an empty page
     if not info:
         await ctx.send(embed=Embed(
@@ -33,10 +33,13 @@ async def create_pages(
             description=if_empty,
             color=FlatUIColours.POMEGRANATE
             ))
-        return
+        return 0
     
     num_pages = ceil(len(info) / elements_per_page)
-    pages = create_pages_str(info, sep, elements_per_page)
+    if page_title:
+        pages = create_pages_str(info, sep, elements_per_page, page_title)
+    else:
+        pages = create_pages_str(info, sep, elements_per_page)
     current_page = 0
     
     page_buttons = ActionRow(
@@ -60,7 +63,8 @@ async def create_pages(
     embed = Embed(
         title=title,
         description=pages[current_page],
-        color = FlatUIColours.AMETHYST
+        color = FlatUIColours.AMETHYST,
+        footer=f"Page {current_page+1}/{num_pages}"
     )
     message: Message = await ctx.send(embed=embed, components=page_buttons)
     
@@ -70,7 +74,7 @@ async def create_pages(
     while True:
         try:
             pressed_button: Component = await ctx.bot.wait_for_component(
-                components=page_buttons, check=check, timeout=10
+                components=page_buttons, check=check, timeout=30
             )
         except TimeoutError:
             for button in page_buttons.components:
@@ -82,7 +86,7 @@ async def create_pages(
                     color=FlatUIColours.AMETHYST
                 ),
                 components=page_buttons)
-            return
+            return 1
         
         match pressed_button.ctx.custom_id:
             case "previous_page":
@@ -91,7 +95,8 @@ async def create_pages(
                 new_embed = Embed(
                     title=title,
                     description=pages[current_page],
-                    color=FlatUIColours.AMETHYST
+                    color=FlatUIColours.AMETHYST,
+                    footer=f"Page {current_page+1}/{num_pages}"
                 )
                 await pressed_button.ctx.edit_origin(embed=new_embed)
             case "next_page":
@@ -99,7 +104,8 @@ async def create_pages(
                 new_embed = Embed(
                     title=title,
                     description=pages[current_page],
-                    color=FlatUIColours.AMETHYST
+                    color=FlatUIColours.AMETHYST,
+                    footer=f"Page {current_page+1}/{num_pages}"
                 )
                 await pressed_button.ctx.edit_origin(embed=new_embed)
             case "close_page":
@@ -112,12 +118,16 @@ async def create_pages(
                         color=FlatUIColours.AMETHYST
                     ),
                     components=page_buttons)
-                return
+                return 0
 
 
 # Helper function to generate a list of strings of the pages
-def create_pages_str(info: list, sep: str, elements_per_page: int):
+def create_pages_str(info: list, sep: str, elements_per_page: int, page_title: str=None):
     # Split the list of elements into lists with the appropiate number of elements
     pages = [info[a:(a+elements_per_page)] for a in range(0, len(info), elements_per_page)]
     # Convert the lists into strings
-    return [sep.join(str(elem) for elem in l) for l in pages]
+    if page_title:
+        pages = [page_title + sep + sep.join(str(elem) for elem in l) for l in pages]
+    else:
+        pages = [sep.join(str(elem) for elem in l) for l in pages]
+    return pages
