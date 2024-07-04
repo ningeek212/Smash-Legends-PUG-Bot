@@ -1,6 +1,6 @@
 from math import ceil
 from interactions import Client, BaseContext, Embed, FlatUIColours, Color, ActionRow
-from interactions import Button, ButtonStyle, component_callback, ComponentContext
+from interactions import Button, ButtonStyle, component_callback, ComponentContext, Message
 from interactions.api.events import Component
 
 
@@ -62,12 +62,15 @@ async def create_pages(
         description=pages[current_page],
         color = FlatUIColours.AMETHYST
     )
-    message = await ctx.send(embed=embed, components=page_buttons)
+    message: Message = await ctx.send(embed=embed, components=page_buttons)
+    
+    async def check(component: Component) -> bool:
+        return component.ctx.message_id == message.id
 
     while True:
         try:
             pressed_button: Component = await ctx.bot.wait_for_component(
-                components=page_buttons, timeout=10
+                components=page_buttons, check=check, timeout=10
             )
         except TimeoutError:
             for button in page_buttons.components:
@@ -83,6 +86,7 @@ async def create_pages(
         
         match pressed_button.ctx.custom_id:
             case "previous_page":
+                print(pressed_button.ctx.message_id)
                 current_page = (current_page - 1) % num_pages
                 new_embed = Embed(
                     title=title,
