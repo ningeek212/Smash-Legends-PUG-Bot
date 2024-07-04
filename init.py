@@ -1,3 +1,5 @@
+import logging
+
 from interactions import Client, Intents, listen, slash_command, SlashContext
 import json
 
@@ -6,12 +8,16 @@ with open("app_credentials.json") as file:
 
 bot_token = token_json["bot_token"]
 
-bot = Client(intents=Intents.DEFAULT)
-# intents are what events we want to receive from discord, `DEFAULT` is usually fine
+logging.basicConfig()
+cls_log = logging.getLogger("SLBotLogger")
+cls_log.setLevel(logging.DEBUG)
 
-@listen()  # this decorator tells snek that it needs to listen for the corresponding event, and run this coroutine
+bot = Client(
+    intents=Intents.DEFAULT,
+    logger=cls_log)
+
+@listen()  
 async def on_ready():
-    # This event is called when the bot is ready to respond to commands
     print("Ready")
     print(f"This bot is owned by {bot.owner}")
 
