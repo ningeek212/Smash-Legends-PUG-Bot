@@ -1,5 +1,7 @@
-from interactions import slash_command, slash_option, SlashContext, Extension, Permissions, OptionType
-from interactions import Task, IntervalTrigger
+from interactions import (
+    slash_command, slash_option, SlashContext, Extension, Permissions, OptionType,
+    Task, IntervalTrigger
+)
 
 
 class BaseCommands(Extension):

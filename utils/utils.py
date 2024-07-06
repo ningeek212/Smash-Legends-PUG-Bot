@@ -1,25 +1,40 @@
 from math import ceil
-from interactions import Client, BaseContext, Embed, FlatUIColours, Color, ActionRow
-from interactions import Button, ButtonStyle, component_callback, ComponentContext, Message
+from interactions import (
+    BaseContext, Embed, FlatUIColours, Color, ActionRow, Member,
+    Button, ButtonStyle, Message
+)
 from interactions.api.events import Component
 
+type Signups = list[Member]
 
-async def error_embed(ctx: BaseContext, description: str):
-    embed = Embed(title="Error ❌", description=description, color=FlatUIColours.POMEGRANATE)
-    message = await ctx.send(embed=embed)
+async def error_embed(ctx: BaseContext, description: str) -> Message:
+    embed = Embed(
+        title="Error ❌",
+        description=description,
+        color=FlatUIColours.POMEGRANATE
+    )
+    message: Message = await ctx.send(embed=embed)
     return message
 
 
-async def success_embed(ctx: BaseContext, description: str):
-    embed = Embed(title="Success ✅", description=description, color=FlatUIColours.EMERLAND)
-    message = await ctx.send(embed=embed)
+async def success_embed(ctx: BaseContext, description: str) -> Message:
+    embed = Embed(
+        title="Success ✅",
+        description=description,
+        color=FlatUIColours.EMERLAND
+    )
+    message: Message = await ctx.send(embed=embed)
     return message
 
 
 async def general_embed(ctx: BaseContext, title: str, description: str,
-                        color: Color=FlatUIColours.AMETHYST):
-    embed = Embed(title=title, description=description, color=color)
-    message = await ctx.send(embed=embed)
+                        color: Color=FlatUIColours.AMETHYST) -> Message:
+    embed = Embed(
+        title=title,
+        description=description,
+        color=color
+    )
+    message: Message = await ctx.send(embed=embed)
     return message
 
 
@@ -69,7 +84,7 @@ async def create_pages(
     message: Message = await ctx.send(embed=embed, components=page_buttons)
     
     async def check(component: Component) -> bool:
-        return component.ctx.message_id == message.id
+        return component.ctx.message_id == message.id and component.ctx.author_id == message.author.id
 
     while True:
         try:
@@ -122,7 +137,7 @@ async def create_pages(
 
 
 # Helper function to generate a list of strings of the pages
-def create_pages_str(info: list, sep: str, elements_per_page: int, page_title: str=None):
+def create_pages_str(info: list, sep: str, elements_per_page: int, page_title: str=None) -> list[str]:
     # Split the list of elements into lists with the appropiate number of elements
     pages = [info[a:(a+elements_per_page)] for a in range(0, len(info), elements_per_page)]
     # Convert the lists into strings
@@ -131,3 +146,13 @@ def create_pages_str(info: list, sep: str, elements_per_page: int, page_title: s
     else:
         pages = [sep.join(str(elem) for elem in l) for l in pages]
     return pages
+
+def signup_list_to_string(signups: Signups) -> str:
+    signup_str: str = 'Signups:\n'
+    for index, signup in enumerate(signups, 1):
+        if signup is None:
+            signup_str += f"{index}.\n"
+        else:
+            signup_str += f"{index}. <@{signup.id}>\n"
+    return signup_str
+

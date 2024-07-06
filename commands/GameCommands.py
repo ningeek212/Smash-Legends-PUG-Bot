@@ -21,7 +21,7 @@ class GameCommands(Extension):
             SlashCommandChoice("Duel", Gamemode.DUEL.value)
         ]
     )
-    async def elo_function(self, ctx: SlashContext, gamemode: int):
+    async def elo_function(self, ctx: SlashContext, gamemode: int) -> None:
         mode = Gamemode(gamemode)
         match mode:
             case Gamemode.DOMINION:
