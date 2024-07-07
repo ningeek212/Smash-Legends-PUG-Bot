@@ -2,18 +2,25 @@ from interactions import (
     Client, GuildText, component_callback, ComponentContext, Embed, Member, Extension, 
     Snowflake
 )
-from typing import Callable
-from utils.enums import TaskType
+from asyncio import create_task
 from utils.utils import signup_list_to_string, error_embed
-from tasks.GameSignup import GameSignup
+from games.GameSignup import GameSignup
 
-type Games = dict[Snowflake, GameSignup]
+type GameSignups = dict[Snowflake, GameSignup]
 
 
-class GameSignupTasks(Extension):
+class GameSignupManager(Extension):
     def __init__(self, bot: Client) -> None:
         self.bot = bot
-        self.games: Games = {}
+        self.games: GameSignups = {}
+    
+    def drop(self):
+        create_task(self.async_drop())
+        super().drop()
+    
+    async def async_drop(self):
+        for game in self.games.values():
+            await game.stop()
     
     def add_channel(self, channel: GuildText) -> GameSignup:
         if channel.id in self.games.keys():
@@ -21,7 +28,7 @@ class GameSignupTasks(Extension):
             return
         new_game = GameSignup(self.bot, channel)
         self.games[channel.id] = new_game
-        
+    
     # Join Dominion button
 
     @component_callback("join_dom")
@@ -33,15 +40,13 @@ class GameSignupTasks(Extension):
             return
 
         joining_member: Member = ctx.author
-        print(f"joining member: {joining_member.display_name}")
-        if joining_member in game.dominion_signups:
-            # TODO: Send message about player already joined
+        if game.is_member_signed(joining_member):
+            # TODO: Send message about player already signed up
             return
         
         game.dominion_signups[game.num_dom_signups] = joining_member
         game.num_dom_signups += 1
         signup_str: str = signup_list_to_string(game.dominion_signups)
-        print(signup_str)
         embed = Embed(
             title="Dominion PUG (3v3)",
             description=signup_str,
@@ -66,7 +71,6 @@ class GameSignupTasks(Extension):
             return
 
         leaving_member: Member = ctx.author
-        print(f"joining member: {leaving_member.display_name}")
         if not leaving_member in game.dominion_signups:
             # TODO: Add message saying player already left
             return
@@ -75,7 +79,6 @@ class GameSignupTasks(Extension):
         game.dominion_signups.append(None)
         game.num_dom_signups -= 1
         signup_str: str = signup_list_to_string(game.dominion_signups)
-        print(signup_str)
         embed = Embed(
             title="Dominion PUG (3v3)",
             description=signup_str,
@@ -94,7 +97,6 @@ class GameSignupTasks(Extension):
             return
 
         joining_member: Member = ctx.author
-        print(f"joining member: {joining_member.display_name}")
         if joining_member in game.duo_signups:
             # TODO: Send message about player already joined
             return
@@ -102,7 +104,6 @@ class GameSignupTasks(Extension):
         game.duo_signups[game.num_duo_signups] = joining_member
         game.num_duo_signups += 1
         signup_str: str = signup_list_to_string(game.duo_signups)
-        print(signup_str)
         embed = Embed(
             title="Duo PUG (2v2)",
             description=signup_str,
@@ -127,7 +128,6 @@ class GameSignupTasks(Extension):
             return
 
         leaving_member: Member = ctx.author
-        print(f"joining member: {leaving_member.display_name}")
         if not leaving_member in game.duo_signups:
             # TODO: Add message saying player already left
             return
@@ -136,7 +136,6 @@ class GameSignupTasks(Extension):
         game.duo_signups.append(None)
         game.num_duo_signups -= 1
         signup_str: str = signup_list_to_string(game.duo_signups)
-        print(signup_str)
         embed = Embed(
             title="Duo PUG (2v2)",
             description=signup_str,
@@ -155,7 +154,6 @@ class GameSignupTasks(Extension):
             return
 
         joining_member: Member = ctx.author
-        print(f"joining member: {joining_member.display_name}")
         if joining_member in game.duel_signups:
             # TODO: Send message about player already joined
             return
@@ -163,7 +161,6 @@ class GameSignupTasks(Extension):
         game.duel_signups[game.num_duel_signups] = joining_member
         game.num_duel_signups += 1
         signup_str: str = signup_list_to_string(game.duel_signups)
-        print(signup_str)
         embed = Embed(
             title="Duel PUG (1v1)",
             description=signup_str,
@@ -188,7 +185,6 @@ class GameSignupTasks(Extension):
             return
 
         leaving_member: Member = ctx.author
-        print(f"joining member: {leaving_member.display_name}")
         if not leaving_member in game.duel_signups:
             # TODO: Add message saying player already left
             return
@@ -197,7 +193,6 @@ class GameSignupTasks(Extension):
         game.duel_signups.append(None)
         game.num_duel_signups -= 1
         signup_str: str = signup_list_to_string(game.duel_signups)
-        print(signup_str)
         embed = Embed(
             title="Duel PUG (1v1)",
             description=signup_str,

@@ -1,6 +1,6 @@
 from interactions import (
     Client, GuildText, Task, Message, Embed, Button, ButtonStyle, ActionRow, IntervalTrigger,
-    spread_to_rows
+    Member, spread_to_rows
 )
 from utils.utils import signup_list_to_string, Signups
 from utils.const import GAME_SIGNUP_INTERVAL
@@ -49,10 +49,23 @@ class GameSignup():
         if not self.active:
             self.bot.logger.warn("Tried stopping signup task loop, but was already stopped")
             return
+        
         self.dominion_task.stop()
         self.duo_task.stop()
         self.duel_task.stop()
+
+        await self.dominion_message.delete()
+        await self.duo_message.delete()
+        await self.duel_message.delete()
+
         self.active = False
+    
+    def is_member_signed(self, member: Member) -> bool:
+        return (
+            member in self.dominion_signups 
+            or member in self.duo_signups 
+            or member in self.duel_signups
+        )
 
     # Dominion loop
 

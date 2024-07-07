@@ -3,7 +3,7 @@ from interactions import (
     Task, ChannelType, GuildText, Message, Embed, ActionRow, Button, ButtonStyle, 
     ComponentContext, component_callback
 )
-from utils.config import COMMAND_PERMISIONS
+from utils.const import COMMAND_PERMISIONS
 from utils.enums import TaskType
 from utils.utils import general_embed, create_pages
 

@@ -84,7 +84,7 @@ async def create_pages(
     message: Message = await ctx.send(embed=embed, components=page_buttons)
     
     async def check(component: Component) -> bool:
-        return component.ctx.message_id == message.id and component.ctx.author_id == message.author.id
+        return component.ctx.message_id == message.id and component.ctx.author_id == ctx.author_id
 
     while True:
         try:

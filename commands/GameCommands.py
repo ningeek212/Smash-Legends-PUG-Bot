@@ -1,11 +1,23 @@
-from interactions import slash_command, slash_option, SlashContext, SlashCommandChoice, Extension
-from interactions import OptionType
+from interactions import (
+    slash_command, slash_option, SlashContext, SlashCommandChoice, Extension, OptionType,
+    Client
+)
+from asyncio import create_task
 from utils.enums import Gamemode
 from utils.utils import create_pages
+from utils.const import COMMAND_PERMISSIONS
 from utils.spreadsheet import get_dominion_elo, get_duo_elo, get_duel_elo
+from games.GameSignupManager import GameSignupManager
 
 
 class GameCommands(Extension):
+    def __init__(self, bot: Client) -> None:
+        self.bot = bot
+        self.game_manager: GameSignupManager = None
+    
+    def add_signup_manager(self, game_manager: GameSignupManager) -> None:
+        self.game_manager = game_manager
+
     @slash_command(
         name="elo",
         description="List the rankings of players for a gamemode according to their elo"
@@ -35,3 +47,18 @@ class GameCommands(Extension):
         data_str = [str(elo).ljust(5, ' ') + '\t' + player for (player, elo) in sorted_data]
         await create_pages(ctx, f"{mode.name} Elo", data_str, page_title="Elo: \t Player:")
 
+    @slash_command(
+        name="channel_game_signups",
+        description="Get a list of all channels currently running game signups",
+        default_member_permissions=COMMAND_PERMISSIONS["TASK_LOOP"]
+    )
+    async def channel_game_signups_function(self, ctx: SlashContext) -> None:
+        game_list: list[str] = []
+        for game in self.game_manager.games.values():
+            game_list.append(f"<#{game.channel.id}>")
+        await create_pages(
+            ctx, "Game signup tasks", game_list,
+            if_empty="No channels currently running game signups"
+        )
+
+        
