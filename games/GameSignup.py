@@ -1,9 +1,16 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from interactions import (
     Client, GuildText, Task, Message, Embed, Button, ButtonStyle, ActionRow, IntervalTrigger,
     Member, spread_to_rows
 )
-from utils.utils import signup_list_to_string, Signups
+from utils.utils import signup_list_to_string
 from utils.const import GAME_SIGNUP_INTERVAL
+from utils.enums import SignupState
+
+if TYPE_CHECKING:
+    from utils.types import Signups
 
 
 class GameSignup():
@@ -18,18 +25,21 @@ class GameSignup():
         self.dominion_message: Message = None
         self.dominion_signups: Signups = [None for i in range(6)]
         self.num_dom_signups: int = 0
+        self.dom_signup_state: SignupState = SignupState.Started
 
         # Duo setup
         self.duo_task: Task = None
         self.duo_message: Message = None
         self.duo_signups: Signups = [None for i in range(4)]
         self.num_duo_signups: int = 0
+        self.duo_signup_state: SignupState = SignupState.Started
 
         # Duel setup
         self.duel_task: Task = None
         self.duel_message: Message = None
         self.duel_signups: Signups = [None for i in range(2)]
         self.num_duel_signups: int = 0
+        self.duel_signup_state: SignupState = SignupState.Started
 
         if not channel is None:
             self._start_dominion_loop()
@@ -44,6 +54,9 @@ class GameSignup():
         self._start_duo_loop()
         self._start_duel_loop()
         self.active = True
+        self.dom_signup_state: SignupState = SignupState.Started
+        self.duo_signup_state: SignupState = SignupState.Started
+        self.duel_signup_state: SignupState = SignupState.Started
     
     async def stop(self) -> None:
         if not self.active:
@@ -53,6 +66,9 @@ class GameSignup():
         self.dominion_task.stop()
         self.duo_task.stop()
         self.duel_task.stop()
+        self.dom_signup_state: SignupState = SignupState.Stopped
+        self.dom_signup_state: SignupState = SignupState.Stopped
+        self.dom_signup_state: SignupState = SignupState.Stopped
 
         await self.dominion_message.delete()
         await self.duo_message.delete()
@@ -73,6 +89,8 @@ class GameSignup():
 
         #========================================================================
         async def dominion_loop():
+            if self.dom_signup_state == SignupState.Launching:
+                return
             if self.dominion_message:
                 await self._restart_dominion_loop()
             

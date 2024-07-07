@@ -6,3 +6,9 @@ class Gamemode(Enum):
     DUO = 2
     DOMINION = 3
 
+
+class SignupState(Enum):
+    Stopped = 0
+    Started = 1
+    Launching = 2
+

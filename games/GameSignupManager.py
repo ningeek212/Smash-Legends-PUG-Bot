@@ -1,12 +1,17 @@
-from interactions import (
-    Client, GuildText, component_callback, ComponentContext, Embed, Member, Extension, 
-    Snowflake
-)
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from asyncio import create_task
+
+from interactions import (
+    Client, GuildText, component_callback, ComponentContext, Embed, Member, Extension
+)
+
 from utils.utils import signup_list_to_string, error_embed
+from utils.enums import SignupState
 from games.GameSignup import GameSignup
 
-type GameSignups = dict[Snowflake, GameSignup]
+if TYPE_CHECKING:
+    from utils.types import GameSignups
 
 
 class GameSignupManager(Extension):
@@ -38,6 +43,9 @@ class GameSignupManager(Extension):
             await error_embed(ctx, description="Tried joining a game with no task loop")
             # TODO: Add error
             return
+        
+        if game.dom_signup_state == SignupState.Launching:
+            return
 
         joining_member: Member = ctx.author
         if game.is_member_signed(joining_member):
@@ -52,10 +60,12 @@ class GameSignupManager(Extension):
             description=signup_str,
             footer=f"({game.num_dom_signups}/6)"
         )
-        await game.dominion_message.edit(embed=embed)
+        await ctx.edit_origin(embed=embed)
 
         if game.num_dom_signups == 6:
+            game.dom_signup_state = SignupState.Launching
             # TODO: start game with signups
+            game.dom_signup_state = SignupState.Started
             game.dominion_task.restart()
         elif game.num_dom_signups > 6:
             await error_embed(ctx, "Uh-oh! More than 6 people signed up! How'd that happen")
@@ -68,6 +78,9 @@ class GameSignupManager(Extension):
         if game is None:
             await error_embed(ctx, description="Tried joining a game with no task loop")
             # TODO: Add error
+            return
+        
+        if game.dom_signup_state == SignupState.Launching:
             return
 
         leaving_member: Member = ctx.author
@@ -84,7 +97,7 @@ class GameSignupManager(Extension):
             description=signup_str,
             footer=f"({game.num_dom_signups}/6)"
         )
-        await game.dominion_message.edit(embed=embed)
+        await ctx.edit_origin(embed=embed)
 
     # Join Duo button
 
@@ -94,6 +107,9 @@ class GameSignupManager(Extension):
         if game is None:
             await error_embed(ctx, description="Tried joining a game with no task loop")
             # TODO: Add error
+            return
+
+        if game.duo_signup_state == SignupState.Launching:
             return
 
         joining_member: Member = ctx.author
@@ -109,10 +125,12 @@ class GameSignupManager(Extension):
             description=signup_str,
             footer=f"({game.num_duo_signups}/4)"
         )
-        await game.duo_message.edit(embed=embed)
+        await ctx.edit_origin(embed=embed)
 
         if game.num_duo_signups == 4:
+            game.duo_signup_state = SignupState.Launching
             # TODO: start game with signups
+            game.duo_signup_state = SignupState.Started
             game.duo_task.restart()
         elif game.num_duo_signups > 4:
             await error_embed(ctx, "Uh-oh! More than 4 people signed up! How'd that happen")
@@ -125,6 +143,9 @@ class GameSignupManager(Extension):
         if game is None:
             await error_embed(ctx, description="Tried joining a game with no task loop")
             # TODO: Add error
+            return
+        
+        if game.duo_signup_state == SignupState.Launching:
             return
 
         leaving_member: Member = ctx.author
@@ -141,7 +162,7 @@ class GameSignupManager(Extension):
             description=signup_str,
             footer=f"({game.num_duo_signups}/4)"
         )
-        await game.duo_message.edit(embed=embed)
+        await ctx.edit_origin(embed=embed)
 
     # Join Duel button
 
@@ -151,6 +172,9 @@ class GameSignupManager(Extension):
         if game is None:
             await error_embed(ctx, description="Tried joining a game with no task loop")
             # TODO: Add error
+            return
+        
+        if game.duel_signup_state == SignupState.Launching:
             return
 
         joining_member: Member = ctx.author
@@ -166,12 +190,14 @@ class GameSignupManager(Extension):
             description=signup_str,
             footer=f"({game.num_duel_signups}/2)"
         )
-        await game.duel_message.edit(embed=embed)
+        await ctx.edit_origin(embed=embed)
 
         if game.num_duel_signups == 2:
+            game.duel_signup_state = SignupState.Launching
             # TODO: start game with signups
+            game.duel_signup_state = SignupState.Started
             game.duel_task.restart()
-        elif game.num_duel_signups > 4:
+        elif game.num_duel_signups > 2:
             await error_embed(ctx, "Uh-oh! More than 2 people signed up! How'd that happen")
     
     # Leave Duo button
@@ -182,6 +208,9 @@ class GameSignupManager(Extension):
         if game is None:
             await error_embed(ctx, description="Tried joining a game with no task loop")
             # TODO: Add error
+            return
+        
+        if game.duel_signup_state == SignupState.Launching:
             return
 
         leaving_member: Member = ctx.author
@@ -198,5 +227,5 @@ class GameSignupManager(Extension):
             description=signup_str,
             footer=f"({game.num_duel_signups}/2)"
         )
-        await game.duel_message.edit(embed=embed)
+        await ctx.edit_origin(embed=embed)
 

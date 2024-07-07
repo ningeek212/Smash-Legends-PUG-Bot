@@ -1,11 +1,15 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from math import ceil
+
 from interactions import (
     BaseContext, Embed, FlatUIColours, Color, ActionRow, Member,
     Button, ButtonStyle, Message
 )
 from interactions.api.events import Component
 
-type Signups = list[Member]
+if TYPE_CHECKING:
+    from utils.types import Signups
 
 async def error_embed(ctx: BaseContext, description: str) -> Message:
     embed = Embed(
