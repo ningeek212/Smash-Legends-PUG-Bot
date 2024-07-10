@@ -113,8 +113,8 @@ class GameSignupManager(Extension):
             return
 
         joining_member: Member = ctx.author
-        if joining_member in game.duo_signups:
-            # TODO: Send message about player already joined
+        if game.is_member_signed(joining_member):
+            # TODO: Send message about player already signed up
             return
         
         game.duo_signups[game.num_duo_signups] = joining_member
@@ -178,8 +178,8 @@ class GameSignupManager(Extension):
             return
 
         joining_member: Member = ctx.author
-        if joining_member in game.duel_signups:
-            # TODO: Send message about player already joined
+        if game.is_member_signed(joining_member):
+            # TODO: Send message about player already signed up
             return
         
         game.duel_signups[game.num_duel_signups] = joining_member

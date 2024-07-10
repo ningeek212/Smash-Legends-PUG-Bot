@@ -2,13 +2,17 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
+from interactions import (
+    Extension
+)
+
 from games.Game import Game
 from utils.enums import Gamemode
 
 if TYPE_CHECKING:
     from utils.types import Games, Signups
 
-class GameManager():
+class GameManager(Extension):
     def __init__(self):
         self.games: Games = {}
     
